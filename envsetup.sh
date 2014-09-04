@@ -76,11 +76,12 @@ function check_product()
 
     if (echo -n $1 | grep -q -e "^cm_") ; then
        CM_BUILD=$(echo -n $1 | sed -e 's/^cm_//g')
-       export BUILD_NUMBER=$((date +%s%N ; echo $CM_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10)
-    else
-       CM_BUILD=
-    fi
     export CM_BUILD
+    else
+       OSR_BUILD=$(echo -n $1 | sed -e 's/^osr_//g')
+    export OSR_BUILD
+    fi
+
 
     CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
         TARGET_PRODUCT=$1 \
@@ -197,7 +198,11 @@ function setpaths()
     fi
 
     unset ANDROID_PRODUCT_OUT
+    unset PRODUCT_ROM_FILE
+    unset ALIAS
     export ANDROID_PRODUCT_OUT=$(get_abs_build_var PRODUCT_OUT)
+    export PRODUCT_ROM_FILE=$(get_build_var PRODUCT_ROM_FILE)
+    export ALIAS=$(get_build_var ALIAS)
     export OUT=$ANDROID_PRODUCT_OUT
 
     unset ANDROID_HOST_OUT
@@ -210,6 +215,13 @@ function setpaths()
     # needed for building linux on MacOS
     # TODO: fix the path
     #export HOST_EXTRACFLAGS="-I "$T/system/kernel_headers/host_include
+    # Regenerated  build.prop
+  echo "Directory of output for Rom..."
+  echo $ANDROID_PRODUCT_OUT
+  if [ -f $ANDROID_PRODUCT_OUT/system/build.prop ]; then
+      echo "Deleting build.prop obsolete..."
+         rm  $ANDROID_PRODUCT_OUT/system/build.prop
+  fi
 }
 
 function printconfig()
@@ -265,19 +277,29 @@ function settitle()
     fi
 }
 
-function check_bash_version()
+function addcompletions()
 {
     # Keep us from trying to run in something that isn't bash.
     if [ -z "${BASH_VERSION}" ]; then
-        return 1
+        return
     fi
 
     # Keep us from trying to run in bash that's too old.
     if [ "${BASH_VERSINFO[0]}" -lt 4 ] ; then
-        return 2
+        return
     fi
 
-    return 0
+    local T dir f
+
+    dirs="sdk/bash_completion vendor/osr/bash_completion"
+    for dir in $dirs; do
+    if [ -d ${dir} ]; then
+        for f in `/bin/ls ${dir}/[a-z]*.bash 2> /dev/null`; do
+            echo "including $f"
+            . $f
+        done
+    fi
+    done
 }
 
 function choosetype()
@@ -456,10 +478,10 @@ function add_lunch_combo()
 }
 
 # add the default one here
-add_lunch_combo aosp_arm-eng
-add_lunch_combo aosp_x86-eng
-add_lunch_combo aosp_mips-eng
-add_lunch_combo vbox_x86-eng
+#add_lunch_combo aosp_arm-eng
+#add_lunch_combo aosp_x86-eng
+#add_lunch_combo aosp_mips-eng
+#add_lunch_combo vbox_x86-eng
 
 function print_lunch_menu()
 {
@@ -675,7 +697,7 @@ function tapas()
 function eat()
 {
     if [ "$OUT" ] ; then
-        MODVERSION=$(get_build_var CM_VERSION)
+        MODVERSION=$(get_build_var OSR_VERSION)
         ZIPFILE=cm-$MODVERSION.zip
         ZIPPATH=$OUT/$ZIPFILE
         if [ ! -f $ZIPPATH ] ; then
@@ -691,7 +713,7 @@ function eat()
             done
             echo "Device Found.."
         fi
-    if (adb shell cat /system/build.prop | grep -q "ro.cm.device=$CM_BUILD");
+    if (adb shell cat /system/build.prop | grep -q "ro.osr.device=$OSR_BUILD");
     then
         # if adbd isn't root we can't write to /cache/recovery/
         adb root
