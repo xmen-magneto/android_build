@@ -111,5 +111,9 @@ $(info   TARGET_DEVICE=$(TARGET_DEVICE))
 $(info   PRODUCT_OUT=$(PRODUCT_OUT))
 $(info   PRODUCT_ROM_FILE=$(PRODUCT_ROM_FILE))
 $(info   PRODUCT_LOCALES=$(PRODUCT_LOCALES))
+ifeq ($(CYNGN_TARGET),true)
+$(info   CYNGN_TARGET=$(CYNGN_TARGET))
+$(info   CYNGN_FEATURES=$(CYNGN_FEATURES))
+endif
 $(info ============================================)
 endif
