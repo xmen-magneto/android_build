@@ -1489,7 +1489,8 @@ ifneq ($(TARGET_CUSTOM_RELEASETOOL),)
 endif
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(OSR_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(OSR_TARGET_PACKAGE) > $(OSR_TARGET_PACKAGE).md5sum
-	@echo -e ${CL_CYN}"Package Complete: $(OSR_TARGET_PACKAGE)"${CL_RST} ./vendor/osr/tools/squisher
+	@echo -e ${CL_CYN}"Package Complete: $(OSR_TARGET_PACKAGE)"${CL_RST}
+	$(hide) ./vendor/osr/tools/squisher
 
 # -----------------------------------------------------------------
 # The update package
