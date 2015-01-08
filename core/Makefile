@@ -195,7 +195,7 @@ $(INSTALLED_BUILD_PROP_TARGET): $(BUILDINFO_SH) $(INTERNAL_BUILD_ID_MAKEFILE) $(
 	$(hide) TARGET_BUILD_TYPE="$(TARGET_BUILD_VARIANT)" \
 			TARGET_DEVICE="$(TARGET_DEVICE)" \
 			CM_DEVICE="$(TARGET_DEVICE)" \
-			OSR_DEVICE="$(TARGET_DEVICE)" \
+			XROM_DEVICE="$(TARGET_DEVICE)" \
 			PRODUCT_NAME="$(TARGET_PRODUCT)" \
 			PRODUCT_BRAND="$(PRODUCT_BRAND)" \
 			PRODUCT_DEFAULT_LANGUAGE="$(call default-locale-language,$(PRODUCT_LOCALES))" \
@@ -681,14 +681,27 @@ ifneq ($(TARGET_PREBUILT_RECOVERY_KERNEL),)
 else
   recovery_kernel := $(INSTALLED_KERNEL_TARGET) # same as a non-recovery system
 endif
+ifeq ($(TARGET_RECOVERY_SCREEN_WIDTH),)
+ifeq ($(TARGET_SCREEN_WIDTH),)
+TARGET_RECOVERY_SCREEN_WIDTH := 720
+else
+TARGET_RECOVERY_SCREEN_WIDTH := $(TARGET_SCREEN_WIDTH)
+endif
+endif
 recovery_uncompressed_ramdisk := $(PRODUCT_OUT)/ramdisk-recovery.cpio
 recovery_ramdisk := $(PRODUCT_OUT)/ramdisk-recovery.img
 recovery_build_prop := $(INSTALLED_BUILD_PROP_TARGET)
 recovery_binary := $(call intermediates-dir-for,EXECUTABLES,recovery)/recovery
 recovery_resources_common := $(call project-path-for,recovery)/res
+recovery_resources_extra := $(call project-path-for,recovery)/res-$(TARGET_RECOVERY_SCREEN_WIDTH)
 recovery_resources_private := $(strip $(wildcard $(TARGET_DEVICE_DIR)/recovery/res))
+ifneq ($(TARGET_RECOVERY_DEVICE_DIRS),)
+recovery_root_private := $(strip \
+    $(foreach d,$(TARGET_RECOVERY_DEVICE_DIRS), $(wildcard $(d)/recovery/root)))
+else
 recovery_root_private := $(strip $(wildcard $(TARGET_DEVICE_DIR)/recovery/root))
-recovery_resource_deps := $(shell find $(recovery_resources_common) \
+endif
+recovery_resource_deps := $(shell find $(recovery_resources_common) $(recovery_resources_extra) \
   $(recovery_resources_private) $(recovery_root_private) -type f)
 ifneq ($(TARGET_RECOVERY_FSTAB),)
   recovery_fstab := $(strip $(wildcard $(TARGET_RECOVERY_FSTAB)))
@@ -777,6 +790,7 @@ $(TARGET_RECOVERY_ROOT_TIMESTAMP): \
 	$(hide) cp -f $(recovery_binary) $(TARGET_RECOVERY_ROOT_OUT)/sbin/
 	mkdir -p $(TARGET_RECOVERY_ROOT_OUT)/system/bin
 	$(hide) cp -rf $(recovery_resources_common) $(TARGET_RECOVERY_ROOT_OUT)/
+	if test -d $(recovery_resources_extra); then cp -rf $(recovery_resources_extra)/* $(TARGET_RECOVERY_ROOT_OUT)/res; fi
 	$(hide) $(foreach item,$(recovery_resources_private), \
 	  cp -rf $(item) $(TARGET_RECOVERY_ROOT_OUT)/)
 	$(foreach item,$(recovery_root_private), \
@@ -920,7 +934,7 @@ SYSTEMIMAGE_SOURCE_DIR := $(TARGET_OUT)
 ifneq ($(INSTALLED_RECOVERYIMAGE_TARGET),)
 intermediates := $(call intermediates-dir-for,PACKAGING,recovery_patch)
 ifndef BOARD_CUSTOM_BOOTIMG_MK
-ifeq ($(CM_BUILD),$(OSR_BUILD),)
+ifeq ($(CM_BUILD),$(XROM_BUILD),)
 RECOVERY_FROM_BOOT_PATCH := $(intermediates)/recovery_from_boot.p
 else
 RECOVERY_FROM_BOOT_PATCH :=
@@ -1479,7 +1493,7 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	   $(separate_recovery) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
-OSR_TARGET_PACKAGE := $(PRODUCT_OUT)/osr-$(OSR_VERSION).zip
+XROM_TARGET_PACKAGE := $(PRODUCT_OUT)/xrom-$(XROM_VERSION).zip
 
 .PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
@@ -1487,10 +1501,10 @@ bacon: otapackage
 ifneq ($(TARGET_CUSTOM_RELEASETOOL),)
 	$(error TARGET_CUSTOM_RELEASETOOL is deprecated)
 endif
-	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(OSR_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(OSR_TARGET_PACKAGE) > $(OSR_TARGET_PACKAGE).md5sum
-	@echo -e ${CL_CYN}"Package Complete: $(OSR_TARGET_PACKAGE)"${CL_RST}
-	$(hide) ./vendor/osr/tools/squisher
+	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(XROM_TARGET_PACKAGE)
+	$(hide) $(MD5SUM) $(XROM_TARGET_PACKAGE) > $(XROM_TARGET_PACKAGE).md5sum
+	@echo -e ${CL_CYN}"Package Complete: $(XROM_TARGET_PACKAGE)"${CL_RST}
+	$(hide) ./vendor/xrom/tools/squisher
 
 # -----------------------------------------------------------------
 # The update package

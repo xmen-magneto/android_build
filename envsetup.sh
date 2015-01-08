@@ -78,8 +78,8 @@ function check_product()
        CM_BUILD=$(echo -n $1 | sed -e 's/^cm_//g')
     export CM_BUILD
     else
-       OSR_BUILD=$(echo -n $1 | sed -e 's/^osr_//g')
-    export OSR_BUILD
+       XROM_BUILD=$(echo -n $1 | sed -e 's/^xrom_//g')
+    export XROM_BUILD
     fi
 
 
@@ -691,7 +691,7 @@ function tapas()
 function eat()
 {
     if [ "$OUT" ] ; then
-        MODVERSION=$(get_build_var OSR_VERSION)
+        MODVERSION=$(get_build_var XROM_VERSION)
         ZIPFILE=cm-$MODVERSION.zip
         ZIPPATH=$OUT/$ZIPFILE
         if [ ! -f $ZIPPATH ] ; then
@@ -707,7 +707,7 @@ function eat()
             done
             echo "Device Found.."
         fi
-    if (adb shell cat /system/build.prop | grep -q "ro.osr.device=$OSR_BUILD");
+    if (adb shell cat /system/build.prop | grep -q "ro.xrom.device=$XROM_BUILD");
     then
         # if adbd isn't root we can't write to /cache/recovery/
         adb root
@@ -2192,7 +2192,7 @@ unset f
 
 # Add completions
 check_bash_version && {
-    dirs="sdk/bash_completion vendor/osr/bash_completion"
+    dirs="sdk/bash_completion vendor/xrom/bash_completion"
     for dir in $dirs; do
     if [ -d ${dir} ]; then
         for f in `/bin/ls ${dir}/[a-z]*.bash 2> /dev/null`; do
