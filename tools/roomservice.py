@@ -190,9 +190,9 @@ def fetch_dependencies(repo_path):
 
     syncable_repos = []
 
-    dependencies_path = repo_path + '/xrom.dependencies'
+    dependencies_path = repo_path + '/xmod.dependencies'
     if not os.path.exists(dependencies_path):
-        print 'No xrom.dependencies file in %s' % repo_path
+        print 'No xmod.dependencies file in %s' % repo_path
         dependencies_path = repo_path + '/cm.dependencies'
 
     if os.path.exists(dependencies_path):

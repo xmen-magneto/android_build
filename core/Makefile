@@ -195,7 +195,7 @@ $(INSTALLED_BUILD_PROP_TARGET): $(BUILDINFO_SH) $(INTERNAL_BUILD_ID_MAKEFILE) $(
 	$(hide) TARGET_BUILD_TYPE="$(TARGET_BUILD_VARIANT)" \
 			TARGET_DEVICE="$(TARGET_DEVICE)" \
 			CM_DEVICE="$(TARGET_DEVICE)" \
-			XROM_DEVICE="$(TARGET_DEVICE)" \
+			XMOD_DEVICE="$(TARGET_DEVICE)" \
 			PRODUCT_NAME="$(TARGET_PRODUCT)" \
 			PRODUCT_BRAND="$(PRODUCT_BRAND)" \
 			PRODUCT_DEFAULT_LANGUAGE="$(call default-locale-language,$(PRODUCT_LOCALES))" \
@@ -934,7 +934,7 @@ SYSTEMIMAGE_SOURCE_DIR := $(TARGET_OUT)
 ifneq ($(INSTALLED_RECOVERYIMAGE_TARGET),)
 intermediates := $(call intermediates-dir-for,PACKAGING,recovery_patch)
 ifndef BOARD_CUSTOM_BOOTIMG_MK
-ifeq ($(CM_BUILD),$(XROM_BUILD),)
+ifeq ($(CM_BUILD),$(XMOD_BUILD),)
 RECOVERY_FROM_BOOT_PATCH := $(intermediates)/recovery_from_boot.p
 else
 RECOVERY_FROM_BOOT_PATCH :=
@@ -1493,7 +1493,7 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 	   $(separate_recovery) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
-XROM_TARGET_PACKAGE := $(PRODUCT_OUT)/xrom-$(XROM_VERSION).zip
+XMOD_TARGET_PACKAGE := $(PRODUCT_OUT)/xmod-$(XMOD_VERSION).zip
 
 .PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
@@ -1501,10 +1501,10 @@ bacon: otapackage
 ifneq ($(TARGET_CUSTOM_RELEASETOOL),)
 	$(error TARGET_CUSTOM_RELEASETOOL is deprecated)
 endif
-	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(XROM_TARGET_PACKAGE)
-	$(hide) $(MD5SUM) $(XROM_TARGET_PACKAGE) > $(XROM_TARGET_PACKAGE).md5sum
-	@echo -e ${CL_CYN}"Package Complete: $(XROM_TARGET_PACKAGE)"${CL_RST}
-	$(hide) ./vendor/xrom/tools/squisher
+	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(XMOD_TARGET_PACKAGE)
+	$(hide) $(MD5SUM) $(XMOD_TARGET_PACKAGE) > $(XMOD_TARGET_PACKAGE).md5sum
+	@echo -e ${CL_CYN}"Package Complete: $(XMOD_TARGET_PACKAGE)"${CL_RST}
+	$(hide) ./vendor/xmod/tools/squisher
 
 # -----------------------------------------------------------------
 # The update package

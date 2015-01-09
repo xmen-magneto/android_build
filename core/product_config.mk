@@ -184,8 +184,8 @@ ifneq ($(strip $(TARGET_BUILD_APPS)),)
 all_product_configs := $(call get-product-makefiles,\
     $(SRC_TARGET_DIR)/product/AndroidProducts.mk)
 else
-ifneq ($(XROM_BUILD),)
-    all_product_configs := $(shell ls device/*/$(XROM_BUILD)/xrom.mk)
+ifneq ($(XMOD_BUILD),)
+    all_product_configs := $(shell ls device/*/$(XMOD_BUILD)/xmod.mk)
 else
 
 ifneq ($(CM_BUILD),)
@@ -198,7 +198,7 @@ ifneq ($(CM_BUILD),)
 endif
 endif
 
-ifeq ($(CM_BUILD),$(XROM_BUILD),)
+ifeq ($(CM_BUILD),$(XMOD_BUILD),)
 
 # Find the product config makefile for the current product.
 # all_product_configs consists items like:
