@@ -76,11 +76,11 @@ function check_product()
 
     if (echo -n $1 | grep -q -e "^xmod_") ; then
        XMOD_BUILD=$(echo -n $1 | sed -e 's/^xmod_//g')
-       export BUILD_NUMBER=$((date +%s%N ; echo $XMOD_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10)
+       export XMOD_BUILD
     else
        NO_BUILD=
+	Algo va mal
     fi
-    export XMOD_BUILD
 
     CALLED_FROM_SETUP=true BUILD_SYSTEM=build/core \
         TARGET_PRODUCT=$1 \
